@@ -1212,12 +1212,8 @@ const checkCanUseAccountingCategory = (
     throw new ValidationFailed('This accounting category is not allowed for this host');
   } else if (accountingCategory.kind && accountingCategory.kind !== 'EXPENSE') {
     throw new ValidationFailed('This accounting category is not allowed for expenses');
-  } else if (
-    accountingCategory.expensesTypes &&
-    accountingCategory.expensesTypes.length > 0 &&
-    !accountingCategory.expensesTypes.includes(expenseType)
-  ) {
-    throw new ValidationFailed(`This accounting category is not allowed for expenses type: ${expenseType}`);
+  } else if (!accountingCategory.isCompatibleWithExpenseType(expenseType)) {
+    throw new ValidationFailed(`This accounting category is not allowed for expense type: ${expenseType}`);
   } else if (accountingCategory.hostOnly && !remoteUser?.isAdmin(host.id)) {
     throw new ValidationFailed('This accounting category can only be used by the host admin');
   }
@@ -1836,10 +1832,24 @@ export async function editExpense(req: express.Request, expenseData: ExpenseData
 
   const { collective } = expense;
   const { host } = collective;
+  const expenseType = expenseData.type || expense.type;
   const isPaidCreditCardCharge =
     expense.type === EXPENSE_TYPE.CHARGE &&
     ['PAID', 'PROCESSING'].includes(expense.status) &&
     Boolean(expense.VirtualCardId);
+
+  // Check category only if it's changing
+  if (expenseData.accountingCategory) {
+    checkCanUseAccountingCategory(remoteUser, expenseType, expenseData.accountingCategory, expense.collective.host);
+  }
+
+  // Edit directly the expense when touching only tags and/or accounting category. It's ok to do that here,
+  // before the `canEditExpense` permissions check, because `editOnlyTagsAndAccountingCategory` has its
+  // own permissions checks that are more permissive (e.g. tags can be edited even if the expense is paid)
+  const modifiedFields = omitBy(expenseData, (_, key) => key === 'id' || !isValueChanging(expense, expenseData, key));
+  if (Object.keys(modifiedFields).every(field => ['tags', 'accountingCategory'].includes(field))) {
+    return editOnlyTagsAndAccountingCategory(expense, modifiedFields, req);
+  }
 
   // Check if 2FA is enforced on any of the account remote user is admin of, unless it's a paid credit card charge
   // since we strictly limit the fields that can be updated in that case
@@ -1864,19 +1874,7 @@ export async function editExpense(req: express.Request, expenseData: ExpenseData
     (await prepareExpenseItemInputs(expenseCurrency, expenseData.items, { isEditing: true })) || expense.items;
   const [hasItemChanges, itemsDiff] = await getItemsChanges(expense.items, updatedItemsData);
   const taxes = expenseData.tax || (expense.data?.taxes as TaxDefinition[]) || [];
-  const expenseType = expenseData.type || expense.type;
   checkTaxes(expense.collective, expense.collective.host, expenseType, taxes);
-
-  // Check category only if it's changing
-  if (expenseData.accountingCategory) {
-    checkCanUseAccountingCategory(remoteUser, expenseType, expenseData.accountingCategory, expense.collective.host);
-  }
-
-  // Edit directly the expense when touching only tags and/or accounting category
-  const modifiedFields = omitBy(expenseData, (_, key) => key === 'id' || !isValueChanging(expense, expenseData, key));
-  if (Object.keys(modifiedFields).every(field => ['tags', 'accountingCategory'].includes(field))) {
-    return editOnlyTagsAndAccountingCategory(expense, modifiedFields, req);
-  }
 
   if (!options?.['skipPermissionCheck'] && !(await canEditExpense(req, expense))) {
     throw new Unauthorized("You don't have permission to edit this expense");
@@ -2119,7 +2117,14 @@ export async function deleteExpense(req: express.Request, expenseId: number): Pr
   return expense.reload({ paranoid: false });
 }
 
-async function payExpenseWithPayPalAdaptive(remoteUser, expense, host, paymentMethod, toPaypalEmail, fees = {}) {
+async function payExpenseWithPayPalAdaptive(
+  remoteUser,
+  expense,
+  host,
+  paymentMethod,
+  toPaypalEmail,
+  fees = {},
+): Promise<Expense> {
   debug('payExpenseWithPayPalAdaptive', expense.id);
 
   if (expense.currency !== expense.collective.currency) {
@@ -2132,7 +2137,7 @@ async function payExpenseWithPayPalAdaptive(remoteUser, expense, host, paymentMe
     throw new Error('PayPal adaptive is currently under maintenance. Please try again later.');
   }
 
-  let paymentResponse = null;
+  let paymentResponse: Awaited<ReturnType<typeof paymentProviders.paypal.types.adaptive.pay>> = null;
   try {
     paymentResponse = await paymentProviders.paypal.types['adaptive'].pay(
       expense.collective,
@@ -2160,7 +2165,7 @@ async function payExpenseWithPayPalAdaptive(remoteUser, expense, host, paymentMe
         // Backward compatible error message parsing
         // eslint-disable-next-line no-case-declarations
         const errorMessage =
-          executePaymentResponse.payErrorList?.payError?.[0].error?.message ||
+          (executePaymentResponse.payErrorList as any)?.payError?.[0].error?.message ||
           executePaymentResponse.payErrorList?.[0].error?.message;
         throw new errors.ServerError(
           `Error while paying the expense with PayPal: "${errorMessage}". Please contact support@opencollective.com or pay it manually through PayPal.`,
@@ -2227,6 +2232,7 @@ async function payExpenseWithPayPalAdaptive(remoteUser, expense, host, paymentMe
       }
     }
 
+    const clearedAt = new Date(executePaymentResponse.responseEnvelope.timestamp);
     const currencyConversion = defaultFundingPlan?.currencyConversion || { exchangeRate: 1 };
     const hostCurrencyFxRate = 1 / parseFloat(currencyConversion.exchangeRate); // paypal returns a float from host.currency to expense.currency
     fees['paymentProcessorFeeInHostCurrency'] = Math.round(hostCurrencyFxRate * senderFees);
@@ -2235,11 +2241,11 @@ async function payExpenseWithPayPalAdaptive(remoteUser, expense, host, paymentMe
     expense.setPaymentMethod(paymentMethod);
     await expense.save();
     // Adaptive does not work with multi-currency expenses, so we can safely assume that expense.currency = collective.currency
-    await createTransactionsFromPaidExpense(host, expense, fees, hostCurrencyFxRate, paymentResponse);
+    await createTransactionsFromPaidExpense(host, expense, fees, hostCurrencyFxRate, { ...paymentResponse, clearedAt });
     // Mark Expense as Paid, create activity and send notifications
-    const updatedExpense = await expense.markAsPaid({ user: remoteUser });
+    await expense.markAsPaid({ user: remoteUser });
     await paymentMethod.updateBalance();
-    return updatedExpense;
+    return expense;
   } catch (err) {
     debug('paypal> error', JSON.stringify(err, null, '  '));
     if (
@@ -2593,6 +2599,7 @@ type PayExpenseArgs = {
   totalAmountPaidInHostCurrency?: number;
   transferDetails?: CreateTransfer['details'];
   paymentMethodService?: PAYMENT_METHOD_SERVICE;
+  clearedAt?: Date;
 };
 
 /**
@@ -2701,6 +2708,7 @@ export async function payExpense(req: express.Request, args: PayExpenseArgs): Pr
           expense,
           paymentProcessorFeeInHostCurrency,
           totalAmountPaidInHostCurrency,
+          { clearedAt: args.clearedAt },
         );
         await expense.update({
           // Remove all fields related to a previous automatic payment
@@ -2774,13 +2782,17 @@ export async function payExpense(req: express.Request, args: PayExpenseArgs): Pr
         }
         // This will detect that payoutMethodType=ACCOUNT_BALANCE and set service=opencollective AND type=collective
         await expense.setAndSavePaymentMethodIfMissing();
-        await createTransactionsFromPaidExpense(host, expense, feesInHostCurrency, 'auto');
+        await createTransactionsFromPaidExpense(host, expense, feesInHostCurrency, 'auto', {
+          clearedAt: args.clearedAt,
+        });
       } else if (expense.legacyPayoutMethod === 'manual' || expense.legacyPayoutMethod === 'other') {
         const paymentMethod = args.paymentMethodService
           ? await host.findOrCreatePaymentMethod(args.paymentMethodService, PAYMENT_METHOD_TYPE.MANUAL)
           : null;
         await expense.update({ PaymentMethodId: paymentMethod?.id || null });
-        await createTransactionsFromPaidExpense(host, expense, feesInHostCurrency, 'auto');
+        await createTransactionsFromPaidExpense(host, expense, feesInHostCurrency, 'auto', {
+          clearedAt: args.clearedAt,
+        });
       }
     } catch (error) {
       if (use2FARollingLimit) {
@@ -2859,7 +2871,7 @@ export async function markExpenseAsUnpaid(
 
     await libPayments.createRefundTransaction(transaction, refundedPaymentProcessorFeeAmount, null, expense.User);
 
-    await expense.update({ status: newExpenseStatus, lastEditedById: remoteUser.id, PayoutMethodId: null });
+    await expense.update({ status: newExpenseStatus, lastEditedById: remoteUser.id, PaymentMethodId: null });
     return { expense, transaction };
   });
 

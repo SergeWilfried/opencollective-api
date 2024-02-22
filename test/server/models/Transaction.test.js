@@ -3,6 +3,7 @@ import config from 'config';
 import { createSandbox } from 'sinon';
 
 import { TransactionKind } from '../../../server/constants/transaction-kind';
+import * as LibActivities from '../../../server/lib/activities';
 import models from '../../../server/models';
 import {
   fakeCollective,
@@ -53,7 +54,6 @@ describe('server/models/Transaction', () => {
   beforeEach(async () => {
     await utils.resetTestDB();
     sandbox = createSandbox();
-    sandbox.stub(config, 'activities').value({ ...config.activities, skipCreationForTransactions: true }); // Async activities are created async, which doesn't play well with `resetTestDb`
     user = await fakeUser({}, { name: 'User' });
     inc = await fakeHost({
       id: 8686,
@@ -177,7 +177,7 @@ describe('server/models/Transaction', () => {
     };
 
     return Transaction.createFromContributionPayload(transactionPayload).then(() => {
-      return Transaction.findAll().then(transactions => {
+      return Transaction.findAll({ order: [['id', 'asc']] }).then(transactions => {
         expect(transactions.length).to.equal(4);
 
         const contributions = transactions.filter(t => t.kind === TransactionKind.CONTRIBUTION);
@@ -204,8 +204,8 @@ describe('server/models/Transaction', () => {
     });
   });
 
-  it('createFromContributionPayload() generates a new activity', async () => {
-    sandbox.stub(config, 'activities').value({ ...config.activities, skipCreationForTransactions: false }); // Async activities are created async, which doesn't play well with `resetTestDb`
+  it('createFromContributionPayload() generates a new activity for allowed collectives', async () => {
+    sandbox.stub(LibActivities, 'shouldGenerateTransactionActivities').returns(true);
     const createActivityStub = sandbox.stub(Transaction, 'createActivity');
 
     const transaction = await Transaction.createFromContributionPayload({
@@ -350,7 +350,10 @@ describe('server/models/Transaction', () => {
 
       await Transaction.createFromContributionPayload(transactionPayload);
 
-      const allTransactions = await Transaction.findAll({ where: { OrderId: order.id } });
+      const allTransactions = await Transaction.findAll({
+        where: { OrderId: order.id },
+        order: [['id', 'asc']],
+      });
       expect(allTransactions).to.have.length(8);
 
       const donationCredit = allTransactions.find(t => t.CollectiveId === inc.id);
@@ -541,6 +544,48 @@ describe('server/models/Transaction', () => {
       expect(debit.amountInHostCurrency).to.equal(0);
       expect(debit.paymentProcessorFeeInHostCurrency).to.equal(-500);
       expect(debit.netAmountInCollectiveCurrency).to.equal(-500);
+    });
+  });
+
+  describe('clearedAt date', () => {
+    beforeEach(async () => {
+      sandbox.stub(config.ledger, 'separatePaymentProcessorFees').value(true);
+      await utils.seedDefaultVendors();
+    });
+
+    it('automatically populates with the current date', async () => {
+      const transaction = await fakeTransaction({ amount: 1000 }, { createDoubleEntry: true });
+      expect(transaction.clearedAt).to.be.a('date');
+    });
+
+    it('propagates the informed clearedAt date to the related transactions', async () => {
+      const order = await fakeOrder({});
+      const transaction = await models.Transaction.createFromContributionPayload({
+        CreatedByUserId: order.CreatedByUserId,
+        FromCollectiveId: order.FromCollectiveId,
+        CollectiveId: order.CollectiveId,
+        PaymentMethodId: order.PaymentMethodId,
+        type: 'CREDIT',
+        OrderId: order.id,
+        amount: 5000,
+        currency: 'USD',
+        hostCurrency: 'USD',
+        amountInHostCurrency: 5000,
+        hostCurrencyFxRate: 1,
+        hostFeeInHostCurrency: 250,
+        paymentProcessorFeeInHostCurrency: 175,
+        description: 'Monthly subscription to Webpack',
+        platformTipAmount: 500,
+        clearedAt: '2024-02-20T14:11:00.000Z',
+      });
+
+      const associatedTransactions = await models.Transaction.findAll({
+        where: { TransactionGroup: transaction.TransactionGroup },
+      });
+      expect(associatedTransactions).to.not.be.empty;
+      for (const t of associatedTransactions) {
+        expect(t.clearedAt.toISOString()).to.equal('2024-02-20T14:11:00.000Z');
+      }
     });
   });
 });

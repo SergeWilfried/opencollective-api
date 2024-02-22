@@ -12,7 +12,7 @@ import {
   isPlatformTipEligible,
 } from '../../lib/payments';
 import { paypalAmountToCents } from '../../lib/paypal';
-import { reportErrorToSentry, reportMessageToSentry } from '../../lib/sentry';
+import { reportErrorToSentry } from '../../lib/sentry';
 import { formatCurrency } from '../../lib/utils';
 import models from '../../models';
 import { OrderModelInterface } from '../../models/Order';
@@ -28,7 +28,7 @@ const recordTransaction = async (
   amount,
   currency,
   paypalFee,
-  { data = undefined, createdAt = undefined } = {},
+  { data = undefined, createdAt = undefined, clearedAt = undefined } = {},
 ): Promise<TransactionInterface> => {
   order.collective = order.collective || (await order.getCollective());
   const host = await order.collective.getHostCollective();
@@ -66,6 +66,8 @@ const recordTransaction = async (
     paymentProcessorFeeInHostCurrency,
     taxAmount: order.taxAmount,
     description: order.description,
+    createdAt: createdAt || null,
+    clearedAt: clearedAt || null,
     data: {
       ...data,
       hasPlatformTip: platformTip ? true : false,
@@ -77,10 +79,6 @@ const recordTransaction = async (
       tax: order.data?.tax,
     },
   };
-
-  if (createdAt) {
-    transactionData['createdAt'] = createdAt;
-  }
 
   return models.Transaction.createFromContributionPayload(transactionData);
 };
@@ -95,6 +93,7 @@ export function recordPaypalSale(order: OrderModelInterface, paypalSale: PaypalS
   const fee = paypalAmountToCents(get(paypalSale, 'transaction_fee.value', '0.0'));
   return recordTransaction(order, amount, currency, fee, {
     data: { paypalSale, paypalCaptureId: paypalSale.id },
+    clearedAt: paypalSale.create_time && new Date(paypalSale.create_time),
   });
 }
 
@@ -109,6 +108,7 @@ export function recordPaypalTransaction(
   return recordTransaction(order, amount, currency, fee, {
     data: { ...data, paypalTransaction, paypalCaptureId: paypalTransaction.id },
     createdAt,
+    clearedAt: paypalTransaction.time && new Date(paypalTransaction.time),
   });
 }
 
@@ -120,9 +120,11 @@ export const recordPaypalCapture = async (
   const currency = capture.amount.currency_code;
   const amount = paypalAmountToCents(capture.amount.value);
   const fee = paypalAmountToCents(get(capture, 'seller_receivable_breakdown.paypal_fee.value', '0.0'));
+
   return recordTransaction(order, amount, currency, fee, {
     data: { ...data, capture, paypalCaptureId: capture.id },
     createdAt,
+    clearedAt: capture.create_time && new Date(capture.create_time),
   });
 };
 
@@ -171,7 +173,7 @@ const processPaypalOrder = async (order, paypalOrderId): Promise<TransactionInte
   captureParams['invoice_id'] = `Contribution #${order.id}`;
   const triggerCaptureURL = `payments/authorizations/${authorizationId}/capture`;
   const captureResult = await paypalRequestV2(triggerCaptureURL, hostCollective, 'POST', captureParams);
-  const captureId = captureResult.id;
+  const captureId = captureResult.id as string;
   await order.update({ data: { ...order.data, paypalCaptureId: captureId } }); // Store immediately in the order to keep track of it in case anything goes wrong with the next queries
 
   if (captureResult.status !== 'COMPLETED') {
@@ -183,26 +185,31 @@ const processPaypalOrder = async (order, paypalOrderId): Promise<TransactionInte
   const captureUrl = `payments/captures/${captureId}`;
   const captureDetails = (await paypalRequestV2(captureUrl, hostCollective, 'GET')) as PaypalCapture;
 
-  // Prevent double-records in the (quite unlikely) case where the webhook event would be processed before the API replies
-  const existingTransaction = await models.Transaction.findOne({
-    where: {
-      OrderId: order.id,
-      type: 'CREDIT',
-      kind: 'CONTRIBUTION',
-      data: { capture: { id: captureId } },
-    },
-  });
+  // Prevent double-records in case the webhook event gets processed before the API replies
+  let transaction;
+  await order.lock(
+    async () => {
+      transaction = await models.Transaction.findOne({
+        where: {
+          OrderId: order.id,
+          type: 'CREDIT',
+          kind: 'CONTRIBUTION',
+          data: { capture: { id: captureId } },
+        },
+      });
 
-  if (existingTransaction) {
-    reportMessageToSentry(`PayPal: Found existing transaction for capture`, {
-      extra: { captureId, orderId: order.id },
-      severity: 'warning',
-      feature: FEATURE.PAYPAL_DONATIONS,
-    });
-    return existingTransaction;
-  } else {
-    return recordPaypalCapture(order, captureDetails);
-  }
+      if (!transaction) {
+        transaction = await recordPaypalCapture(order, captureDetails);
+      }
+    },
+    {
+      // Retry for 10 seconds
+      retryDelay: 500,
+      retries: 20,
+    },
+  );
+
+  return transaction;
 };
 
 export const refundPaypalCapture = async (

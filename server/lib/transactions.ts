@@ -1,6 +1,6 @@
 import assert from 'assert';
 
-import { get, groupBy, mapValues, round, set, sumBy, truncate } from 'lodash';
+import { get, groupBy, round, set, sumBy, truncate, uniq } from 'lodash';
 import { Order } from 'sequelize';
 
 import ExpenseType from '../constants/expense-type';
@@ -9,7 +9,7 @@ import { TransactionKind } from '../constants/transaction-kind';
 import { TransactionTypes } from '../constants/transactions';
 import { toNegative } from '../lib/math';
 import { exportToCSV, sumByWhen } from '../lib/utils';
-import models, { Op } from '../models';
+import models, { Op, sequelize } from '../models';
 import Tier from '../models/Tier';
 import { TransactionInterface } from '../models/Transaction';
 
@@ -24,7 +24,7 @@ const { CHARGE } = ExpenseType;
  * Export transactions as CSV
  * @param {*} transactions
  */
-export function exportTransactions(transactions, attributes) {
+export function exportTransactions(transactions, attributes?) {
   attributes = attributes || [
     'id',
     'createdAt',
@@ -50,7 +50,12 @@ export function exportTransactions(transactions, attributes) {
  * @param {*} endDate
  * @param {*} limit
  */
-export function getTransactions(collectiveids, startDate = new Date('2015-01-01'), endDate = new Date(), options) {
+export function getTransactions(
+  collectiveids,
+  startDate = new Date('2015-01-01'),
+  endDate = new Date(),
+  options,
+): Promise<TransactionInterface[]> {
   const where = options.where || {};
   const query = {
     where: {
@@ -79,6 +84,32 @@ const DEFAULT_FEES = {
   paymentProcessorFeeInHostCurrency: 0,
   hostFeeInHostCurrency: 0,
   platformFeeInHostCurrency: 0,
+};
+
+export const getPaidTaxTransactions = async (
+  hostId: number,
+  startDate = new Date('2015-01-01'),
+  endDate = new Date(),
+): Promise<TransactionInterface[]> => {
+  return sequelize.query(
+    `
+    SELECT t.*
+    FROM "Transactions" t
+    INNER JOIN "Transactions" expense_transaction
+      ON expense_transaction.kind = 'EXPENSE'
+      AND expense_transaction.type = 'DEBIT'
+      AND expense_transaction."TransactionGroup" = t."TransactionGroup"
+    WHERE expense_transaction."HostCollectiveId" = :hostId
+      AND t.kind = 'TAX'
+      AND t.type = 'DEBIT'
+      AND t."createdAt" >= :startDate
+      AND t."createdAt" < :endDate
+  `,
+    {
+      model: models.Transaction,
+      replacements: { hostId, startDate, endDate },
+    },
+  );
 };
 
 /**
@@ -154,7 +185,7 @@ export async function createTransactionsFromPaidExpense(
   /** Set this to a different value if the expense was paid in a currency that differs form the host's */
   expenseToHostFxRateConfig: number | 'auto',
   /** Will be stored in transaction.data */
-  transactionData: Record<string, unknown> = null,
+  transactionData: Record<string, unknown> & { clearedAt?: Date } = null,
 ) {
   fees = { ...DEFAULT_FEES, ...fees };
   if (!expense.collective) {
@@ -178,6 +209,7 @@ export async function createTransactionsFromPaidExpense(
   }
 
   const paymentMethod = await expense.getPaymentMethod();
+  const { clearedAt, ...data } = transactionData || {};
 
   // To group all the info we retrieved from the payment. All amounts are expected to be in expense currency
   const { paymentProcessorFeeInHostCurrency, hostFeeInHostCurrency, platformFeeInHostCurrency } = fees;
@@ -208,8 +240,9 @@ export async function createTransactionsFromPaidExpense(
     PaymentMethodId: paymentMethod?.id,
     PayoutMethodId: expense.PayoutMethodId,
     taxAmount: processedAmounts.tax.inCollectiveCurrency,
+    clearedAt: clearedAt,
     data: {
-      ...(transactionData || {}),
+      ...data,
       ...expenseDataForTransaction,
     },
   };
@@ -231,7 +264,7 @@ export async function createTransactionsForManuallyPaidExpense(
   paymentProcessorFeeInHostCurrency,
   totalAmountPaidInHostCurrency,
   /** Will be stored in transaction.data */
-  transactionData: Record<string, unknown> = {},
+  transactionData: Record<string, unknown> & { clearedAt?: Date } = {},
 ) {
   assert(paymentProcessorFeeInHostCurrency >= 0, 'Payment processor fee must be positive');
   assert(totalAmountPaidInHostCurrency > 0, 'Total amount paid must be positive');
@@ -283,6 +316,7 @@ export async function createTransactionsForManuallyPaidExpense(
     };
   }
 
+  const { clearedAt, ...data } = transactionData || {};
   // To group all the info we retrieved from the payment. All amounts are expected to be in expense currency
   const transaction = {
     ...amounts,
@@ -299,9 +333,11 @@ export async function createTransactionsForManuallyPaidExpense(
     FromCollectiveId: expense.FromCollectiveId,
     HostCollectiveId: host.id,
     PayoutMethodId: expense.PayoutMethodId,
+    PaymentMethodId: expense.PaymentMethodId,
+    clearedAt: clearedAt,
     data: {
       isManual: true,
-      ...transactionData,
+      ...data,
       ...expenseDataForTransaction,
     },
   };
@@ -458,16 +494,45 @@ export async function generateDescription(transaction, { req = null, full = fals
  *   [TaxId]: { totalCollected: number, totalPaid: number }
  * }
  */
-export const getTaxesSummary = (allTransactions: TransactionInterface[]) => {
-  const transactionsWithTaxes = allTransactions.filter(t => t.taxAmount);
-  if (!transactionsWithTaxes.length) {
+export const getTaxesSummary = (
+  allTransactions: TransactionInterface[],
+  taxesCollectedTransactions: TransactionInterface[] = [],
+  paidTaxTransactions: TransactionInterface[] = [],
+) => {
+  const legacyTransactionsWithTaxes = allTransactions.filter(t => t.taxAmount);
+  if (!legacyTransactionsWithTaxes.length && !taxesCollectedTransactions.length && !paidTaxTransactions.length) {
     return null;
   }
 
-  const groupedTransactions = groupBy(transactionsWithTaxes, 'data.tax.id');
-  const getTaxAmountInHostCurrency = transaction => transaction.taxAmount * (transaction.hostCurrencyRate || 1) || 0;
-  return mapValues(groupedTransactions, transactions => ({
-    collected: Math.abs(sumByWhen(transactions, getTaxAmountInHostCurrency, t => t.type === 'CREDIT')),
-    paid: sumByWhen(transactions, getTaxAmountInHostCurrency, t => t.type === 'DEBIT'),
-  }));
+  // A helper to get the tax amount in host currency from legacy transactions
+  const getLegacyTaxAmountInHostCurrency = transaction =>
+    transaction.taxAmount * (transaction.hostCurrencyRate || 1) || 0;
+
+  // Group transactions by tax id
+  const groupedLegacyTransactions = groupBy(legacyTransactionsWithTaxes, 'data.tax.id');
+  const groupedTaxesCollectedTransactions = groupBy(taxesCollectedTransactions, 'data.tax.id');
+  const groupedPaidTaxTransactions = groupBy(paidTaxTransactions, 'data.tax.id');
+  const allTaxIds = uniq([
+    ...Object.keys(groupedLegacyTransactions),
+    ...Object.keys(groupedTaxesCollectedTransactions),
+    ...Object.keys(groupedPaidTaxTransactions),
+  ]);
+
+  return Object.fromEntries(
+    allTaxIds.map(taxId => {
+      const legacyTransactions = groupedLegacyTransactions[taxId] || [];
+      return [
+        taxId,
+        {
+          collected: Math.abs(
+            sumByWhen(legacyTransactions, getLegacyTaxAmountInHostCurrency, t => t.type === 'CREDIT') +
+              sumByWhen(groupedTaxesCollectedTransactions[taxId], 'amountInHostCurrency', t => t.type === 'DEBIT'),
+          ),
+          paid:
+            sumByWhen(legacyTransactions, getLegacyTaxAmountInHostCurrency, t => t.type === 'DEBIT') +
+            sumBy(groupedPaidTaxTransactions[taxId], 'amountInHostCurrency'),
+        },
+      ];
+    }),
+  );
 };

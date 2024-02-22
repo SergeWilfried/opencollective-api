@@ -1,8 +1,6 @@
 /* eslint-disable camelcase */
-
-import { createHash } from 'crypto';
-
 import { isNil, round, toNumber } from 'lodash';
+import { v4 as uuid } from 'uuid';
 
 import activities from '../../constants/activities';
 import status from '../../constants/expense-status';
@@ -51,11 +49,7 @@ export const payExpensesBatch = async (expenses: Expense[]): Promise<Expense[]> 
 
   // Map expense items...
   const items = expenses.map(getExpenseItem);
-
-  // Calculate unique sender_batch_id hash
-  const hash = createHash('SHA1');
-  expenses.forEach(e => hash.update(e.id.toString()));
-  const sender_batch_id = hash.digest('hex');
+  const sender_batch_id = uuid();
 
   const requestBody = {
     sender_batch_header: {
@@ -137,7 +131,10 @@ export const checkBatchItemStatus = async (
         }
         // This will detect that payoutMethodType=PAYPAL and set service=paypal AND type=payout
         await expense.setAndSavePaymentMethodIfMissing();
-        await createTransactionsFromPaidExpense(host, expense, fees, fxRate, item);
+        await createTransactionsFromPaidExpense(host, expense, fees, fxRate, {
+          ...item,
+          clearedAt: item.time_processed && new Date(item.time_processed),
+        });
         // Mark Expense as Paid, create activity and send notifications
         await expense.markAsPaid();
       }

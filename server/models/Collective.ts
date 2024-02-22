@@ -59,6 +59,7 @@ import roles, { MemberRoleLabels } from '../constants/roles';
 import { hasOptedOutOfFeature, isFeatureAllowedForCollectiveType } from '../lib/allowed-features';
 import {
   getBalanceAmount,
+  getBalanceTimeSeries,
   getContributionsAndContributorsCount,
   getTotalAmountPaidExpenses,
   getTotalAmountReceivedAmount,
@@ -110,7 +111,7 @@ import Expense from './Expense';
 import HostApplication, { HostApplicationStatus } from './HostApplication';
 import { LegalDocumentModelInterface } from './LegalDocument';
 import Location from './Location';
-import Member from './Member';
+import Member, { MemberModelInterface } from './Member';
 import MemberInvitation from './MemberInvitation';
 import Order from './Order';
 import PaymentMethod from './PaymentMethod';
@@ -304,8 +305,10 @@ class Collective extends Model<
 
   public declare host?: NonAttribute<Collective>;
 
-  public declare members?: NonAttribute<Array<typeof Member>>;
-  public declare getMembers: HasManyGetAssociationsMixin<typeof Member>;
+  public declare members?: NonAttribute<Array<MemberModelInterface>>;
+  public declare getMembers: HasManyGetAssociationsMixin<MemberModelInterface>;
+  public declare adminMembers?: NonAttribute<Array<MemberModelInterface>>;
+  public declare getAdminMembers: HasManyGetAssociationsMixin<MemberModelInterface>;
 
   public declare legalDocuments?: NonAttribute<LegalDocumentModelInterface[]>;
 
@@ -2790,6 +2793,10 @@ class Collective extends Model<
 
   getTotalAmountReceivedTimeSeries = function (options) {
     return getTotalAmountReceivedTimeSeries(this, options);
+  };
+
+  getBalanceTimeSeries = function (options) {
+    return getBalanceTimeSeries(this, options);
   };
 
   getContributionsAndContributorsCount = function (options) {
