@@ -45,8 +45,8 @@
     "@paypal/payouts-sdk": "1.1.1",
     "@peculiar/asn1-schema": "2.3.8",
     "@peculiar/asn1-x509": "2.3.8",
-    "@sentry/node": "7.104.0",
-    "@sentry/types": "7.104.0",
+    "@sentry/node": "7.105.0",
+    "@sentry/types": "7.105.0",
     "@shopify/address": "4.2.0",
     "@simplewebauthn/server": "9.0.3",
     "@simplewebauthn/types": "9.0.1",
@@ -121,7 +121,7 @@
     "sanitize-html": "2.12.1",
     "sequelize": "6.37.1",
     "sequelize-cli": "6.6.2",
-    "sequelize-temporal": "1.0.8",
+    "sequelize-temporal": "2.0.0",
     "sharp": "0.33.2",
     "spdx-license-list": "6.9.0",
     "speakeasy": "2.0.0",
@@ -132,7 +132,7 @@
     "twitter-api-v2": "1.16.0",
     "uuid": "9.0.1",
     "validator": "13.11.0",
-    "winston": "3.11.0",
+    "winston": "3.12.0",
     "zod": "3.22.4"
   },
   "devDependencies": {
