@@ -102,7 +102,7 @@ module.exports = {
           paranoid: true,
         },
       )
-      .tap(() =>
+      .then(() =>
         queryInterface.addColumn('Transactions', 'ExpenseId', {
           type: Sequelize.INTEGER,
           references: {
