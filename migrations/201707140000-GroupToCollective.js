@@ -174,14 +174,14 @@ const getCreatedByUserIdForCollective = (sequelize, collective) => {
     });
 };
 
-// // From Aseem:
-// const updateExpenseTransactions = sequelize => {
-//   return sequelize.query(`
-//   UPDATE "Transactions" as t
-//   SET "UserId" = e."UserId" FROM "Expenses" as e
-//   WHERE t."UserId" = t."HostId" AND t."UserId" != e."UserId" AND t."ExpenseId" IS NOT NULL and t."ExpenseId" = e.id;
-//   `);
-// };
+// From Aseem:
+const updateExpenseTransactions = sequelize => {
+  return sequelize.query(`
+  UPDATE "Transactions" as t
+  SET "UserId" = e."UserId" FROM "Expenses" as e
+  WHERE t."UserId" = t."HostId" AND t."UserId" != e."UserId" AND t."ExpenseId" IS NOT NULL and t."ExpenseId" = e.id;
+  `);
+};
 
 const updateMembersRole = sequelize => {
   return sequelize
