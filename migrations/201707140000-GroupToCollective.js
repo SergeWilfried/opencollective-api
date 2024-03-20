@@ -177,7 +177,7 @@ const getCreatedByUserIdForCollective = (sequelize, collective) => {
 // From Aseem:
 const updateExpenseTransactions = sequelize => {
   return sequelize.query(`
-  UPDATE "Transactions" as t 
+  UPDATE "Transactions" as t
   SET "UserId" = e."UserId" FROM "Expenses" as e
   WHERE t."UserId" = t."HostId" AND t."UserId" != e."UserId" AND t."ExpenseId" IS NOT NULL and t."ExpenseId" = e.id;
   `);
@@ -291,7 +291,7 @@ const createCollectivesForEvents = sequelize => {
         `SELECT id, "EventId", type FROM "Tiers" WHERE "EventId" IS NOT NULL`,
         { type: sequelize.QueryTypes.SELECT },
       )
-      .tap(tiers => console.log('Processing', tiers.length, 'tiers'))
+      .then(tiers => console.log('Processing', tiers.length, 'tiers'))
       .then(
         tiers =>
           tiers && Promise.map(tiers, updateTierForEvent, { concurrency: 10 }),
@@ -330,7 +330,7 @@ const createCollectivesForEvents = sequelize => {
 
   return sequelize
     .query(`SELECT * FROM "Events"`, { type: sequelize.QueryTypes.SELECT })
-    .tap(events => console.log('Processing', events.length, 'events'))
+    .then(events => console.log('Processing', events.length, 'events'))
     .then(
       events =>
         events &&
@@ -497,9 +497,9 @@ const createCollectivesForUsers = sequelize => {
     .query(
       `
     SELECT
-      m.role, u.id, u."StripeAccountId", "isOrganization", username, "firstName", "lastName", image, u."createdAt", 
+      m.role, u.id, u."StripeAccountId", "isOrganization", username, "firstName", "lastName", image, u."createdAt",
       u."twitterHandle", u.mission, u.description, u."longDescription", u.website, u.currency
-    FROM "Users" u 
+    FROM "Users" u
     LEFT JOIN (
       SELECT DISTINCT("CreatedByUserId") as "CreatedByUserId", role FROM "Members" WHERE role='HOST'
     ) m
@@ -507,7 +507,7 @@ const createCollectivesForUsers = sequelize => {
   `,
       { type: sequelize.QueryTypes.SELECT },
     )
-    .tap(users => console.log('Processing', users.length, 'users'))
+    .then(users => console.log('Processing', users.length, 'users'))
     .then(
       users =>
         users &&
@@ -836,7 +836,7 @@ const updateCollectives = sequelize => {
     return addTiers(collective)
       .then(tiers => addUsersToTiers(collective, tiers))
       .then(() => getHostCollectiveId(sequelize, collective.id))
-      .tap(id => (HostCollectiveId = id))
+      .then(id => (HostCollectiveId = id))
       .then(() => getCreatedByUserIdForCollective(sequelize, collective))
       .then(UserId => (CreatedByUserId = UserId))
       .then(() => {
