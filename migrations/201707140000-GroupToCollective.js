@@ -836,8 +836,10 @@ const updateCollectives = sequelize => {
     return addTiers(collective)
       .then(tiers => addUsersToTiers(collective, tiers))
       .then(() => getHostCollectiveId(sequelize, collective.id))
-      .then(id => (HostCollectiveId = id))
-      .then(() => getCreatedByUserIdForCollective(sequelize, collective))
+      .then(id => {
+        HostCollectiveId = id;
+        return getCreatedByUserIdForCollective(sequelize, collective);
+      })
       .then(UserId => (CreatedByUserId = UserId))
       .then(() => {
         const ParentCollectiveId = HostCollectiveId;
