@@ -167,7 +167,7 @@ export async function getOrCreatePlan(
   tier: Tier = null,
 ): Promise<PaypalPlan> {
   const product = await models.PaypalProduct.findOne({
-    where: { CollectiveId: collective.id, TierId: tier?.id || null },
+    where: { CollectiveId: collective.id, HostCollectiveId: host.id, TierId: tier?.id || null },
     include: [
       {
         association: 'plans',
@@ -209,6 +209,7 @@ export async function getOrCreatePlan(
         product: {
           id: <string>paypalProduct.id,
           CollectiveId: collective.id,
+          HostCollectiveId: host.id,
           TierId: tier?.id,
         },
       },
@@ -336,12 +337,21 @@ const verifySubscription = async (order: OrderModelInterface, paypalSubscription
     throw new Error('Subscription must be approved to be activated');
   }
 
+  // If the tier has been deleted, let's make sure we switch to a plan that matches the order
+  let tierId = order.TierId;
+  if (tierId && !order.Tier) {
+    const tier = await models.Tier.findByPk(tierId);
+    if (!tier) {
+      tierId = null;
+    }
+  }
+
   const plan = await models.PaypalPlan.findOne({
     where: { id: paypalSubscription.plan_id },
     include: [
       {
         association: 'product',
-        where: { CollectiveId: order.CollectiveId, TierId: order.TierId },
+        where: { CollectiveId: order.CollectiveId, TierId: tierId },
         required: true,
       },
     ],
