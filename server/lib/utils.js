@@ -5,7 +5,6 @@ import { URL } from 'url';
 
 import config from 'config';
 import fastRedact from 'fast-redact';
-import pdf from 'html-pdf';
 import { filter, get, isEqual, padStart, sumBy } from 'lodash';
 import moment from 'moment';
 import pFilter from 'p-filter';
@@ -254,14 +253,10 @@ export function exportToPDF(template, data, options) {
   options.format = options.paper;
 
   options.timeout = 60000;
+  // / FIXME
+  return new Promise((resolve) => {
+    return resolve(true);
 
-  return new Promise((resolve, reject) => {
-    pdf.create(html, options).toBuffer((err, buffer) => {
-      if (err) {
-        return reject(err);
-      }
-      return resolve(buffer);
-    });
   });
 }
 
