@@ -136,7 +136,6 @@
   "devDependencies": {
     "@babel/cli": "^7.23.4",
     "@babel/eslint-parser": "^7.23.3",
-    "sharp": "^0.33.3",
     "@babel/register": "^7.23.7",
     "@graphql-eslint/eslint-plugin": "^3.20.1",
     "@opentelemetry/api": "^1.7.0",
@@ -193,10 +192,11 @@
     "typescript": "5.3.3"
   },
   "scripts": {
-    "build": "npm run build:clean && npm run build:updates && npm run build:server",
+    "build": "npm run add:sharp && npm run build:clean && npm run build:updates && npm run build:server",
     "build:clean": "rm -rf dist && mkdir dist",
     "build:server": "babel server --copy-files --extensions .js,.ts -d ./dist",
     "build:updates": "npm --prefix node_modules/cloudflare-ip run update-list",
+    "add:sharp": "npm install sharp",
     "clean": "npm run build:clean && npm run test:clean",
     "commit": "git-cz",
     "compile:email": "babel-node --extensions .js,.ts scripts/compile-email.js",
@@ -293,5 +293,5 @@
       "lint-staged",
       "mocha"
     ]
-  }
+  } 
 }
