@@ -14,6 +14,7 @@ import * as connectedAccounts from './controllers/connectedAccounts';
 import * as gitbook from './controllers/gitbook';
 import helloworks from './controllers/helloworks';
 import uploadImage from './controllers/images';
+import LegalDocumentsController from './controllers/legal-documents';
 import * as email from './controllers/services/email';
 import * as transferwise from './controllers/transferwise';
 import * as users from './controllers/users';
@@ -291,12 +292,6 @@ export default async app => {
               // This will never happen for logged-in users as cacheKey is not set
               if (req.cacheKey && !response?.errors && executionTime > minExecutionTimeToCache) {
                 cache.set(req.cacheKey, result, Number(config.graphql.cache.ttl));
-                // Index key
-                cache.get(`graphqlCacheKeys_${req.cacheSlug}`).then(keys => {
-                  keys = keys || [];
-                  keys.push(req.cacheKey);
-                  cache.set(`graphqlCacheKeys_${req.cacheSlug}`, keys);
-                });
               }
             },
           };
@@ -403,6 +398,11 @@ export default async app => {
    * Hello Works API - Helloworks hits this endpoint when a document has been completed.
    */
   app.post('/helloworks/callback', helloworks.callback);
+
+  /**
+   * File downloads
+   */
+  app.get('/legal-documents/:id/download', LegalDocumentsController.download);
 
   /**
    * Gitbook Search API
