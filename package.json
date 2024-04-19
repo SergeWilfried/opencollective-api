@@ -237,7 +237,6 @@
     "lint:check": "npm run lint -- --quiet",
     "lint:fix": "npm run lint -- --fix",
     "maildev": "maildev",
-    "postinstall": "./scripts/postinstall.sh",
     "prettier": "prettier \"**/*.@(js|ts|json|md)\" --ignore-path .eslintignore",
     "prettier:check": "npm run prettier -- --check",
     "prettier:write": "npm run prettier -- --write",
