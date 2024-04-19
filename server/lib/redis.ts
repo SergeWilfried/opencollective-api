@@ -45,6 +45,7 @@ export async function createRedisClient(
   }
 
   try {
+    logger.info(`Redis starting connection (${instanceType})`);
     const client = createClient(redisOptions);
     client.on('error', err => logger.error(`Redis error (${instanceType})`, err));
     client.on('reconnecting', () => logger.info(`Redis reconnecting (${instanceType})`));
@@ -53,6 +54,7 @@ export async function createRedisClient(
     client.on('end', () => logger.info(`Redis connection closed (${instanceType})`));
 
     await client.connect();
+    logger.info(`Redis connected (${instanceType})`);
     redisInstances[instanceType] = client as RedisClientType;
   } catch (err) {
     logger.error(`Redis connection error (${instanceType})`, err);
