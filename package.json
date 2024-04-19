@@ -192,11 +192,10 @@
     "typescript": "5.3.3"
   },
   "scripts": {
-    "build": "npm run add:sharp && npm run build:clean && npm run build:updates && npm run build:server",
+    "build": "npm run build:clean && npm run build:updates && npm run build:server",
     "build:clean": "rm -rf dist && mkdir dist",
     "build:server": "babel server --copy-files --extensions .js,.ts -d ./dist",
     "build:updates": "npm --prefix node_modules/cloudflare-ip run update-list",
-    "add:sharp": "npm install sharp",
     "clean": "npm run build:clean && npm run test:clean",
     "commit": "git-cz",
     "compile:email": "babel-node --extensions .js,.ts scripts/compile-email.js",
