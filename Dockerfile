@@ -4,7 +4,11 @@ WORKDIR /usr/server
 
 # Install dependencies first
 COPY package*.json ./
+ARG NODE_ENV=development
+ENV NODE_ENV $NODE_ENV
 RUN npm install --unsafe-perm --legacy-peer-deps
+ARG NODE_ENV=production
+ENV NODE_ENV $NODE_ENV
 COPY . .
 
 ARG PORT=3000
@@ -16,7 +20,7 @@ ENV NODE_ENV $NODE_ENV
 ARG API_URL=https://api-staging.opencollective.com
 ENV API_URL $API_URL
 
-ARG INTERNAL_API_URL=https://api-staging-direct.opencollective.com
+ARG INTERNAL_API_URL=https://api-staging-direct.doohi.org
 ENV INTERNAL_API_URL $INTERNAL_API_URL
 
 ARG API_KEY=09u624Pc9F47zoGLlkg1TBSbOl2ydSAq
