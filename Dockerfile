@@ -4,11 +4,7 @@ WORKDIR /usr/server
 
 # Install dependencies first
 COPY package*.json ./
-ARG NODE_ENV=development
-ENV NODE_ENV $NODE_ENV
 RUN npm install --unsafe-perm --legacy-peer-deps
-ARG NODE_ENV=production
-ENV NODE_ENV $NODE_ENV
 COPY . .
 
 ARG PORT=3000
