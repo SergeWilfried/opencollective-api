@@ -121,6 +121,7 @@
     "sequelize": "6.37.3",
     "sequelize-cli": "6.6.2",
     "sequelize-temporal": "2.0.0",
+    "sharp": "^0.33.3",
     "spdx-license-list": "6.9.0",
     "speakeasy": "2.0.0",
     "stripe": "14.25.0",
@@ -132,6 +133,9 @@
     "validator": "13.11.0",
     "winston": "3.13.0",
     "zod": "3.22.4"
+  },
+  "optionalDependencies": {
+    "@img/sharp-linux-x64": "^0.33.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.23.4",
@@ -291,5 +295,5 @@
       "lint-staged",
       "mocha"
     ]
-  } 
+  }
 }
