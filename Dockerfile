@@ -1,6 +1,6 @@
 FROM node:20.11
 
-WORKDIR /usr/.
+WORKDIR /usr/server
 
 # Install dependencies first
 COPY package*.json ./
@@ -24,7 +24,7 @@ ENV API_KEY $API_KEY
 
 RUN npm run build
 
-RUN npm prune --omit=dev --legacy-peer-dependencies
+RUN npm prune --legacy-peer-dependencies
 
 EXPOSE ${PORT}
 
