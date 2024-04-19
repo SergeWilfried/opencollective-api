@@ -1,6 +1,6 @@
 FROM node:20.11
 
-WORKDIR /usr/server
+WORKDIR /usr/src/app
 
 # Install dependencies first
 COPY package*.json ./
