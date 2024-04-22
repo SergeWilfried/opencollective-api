@@ -142,7 +142,7 @@ const sendMessage = (
   // Add environment to subject if not prod
   if (config.env === 'staging') {
     subject = `[STAGING] ${subject}`;
-  } else if (config.env !== 'production' && config.host.website !== 'https://opencollective.com') {
+  } else if (config.env !== 'production' && config.host.website !== 'https://doohi.org') {
     subject = `[TESTING] ${subject}`;
   }
 

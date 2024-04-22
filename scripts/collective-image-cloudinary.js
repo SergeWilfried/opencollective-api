@@ -7,7 +7,7 @@ import UploadedFile from '../server/models/UploadedFile';
 
 async function main() {
   const collectives = await models.Collective.findAll({
-    where: { image: { [Op.iLike]: 'https://res.cloudinary.com/opencollective/%' } },
+    where: { image: { [Op.iLike]: 'https://res.cloudinary.com/doohi/%' } },
   });
 
   for (const collective of collectives) {
