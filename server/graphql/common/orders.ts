@@ -61,7 +61,7 @@ export async function addFunds(order: AddFundsInput, remoteUser: User) {
       const fromCollectiveHostId = await fromCollective.getHostCollectiveId();
       if (!remoteUser.isAdmin(fromCollectiveHostId) && !host.data?.allowAddFundsFromAllAccounts) {
         throw new Error(
-          "You don't have the permission to add funds from accounts you don't own or host. Please contact support@opencollective.com if you want to enable this.",
+          "You don't have the permission to add funds from accounts you don't own or host. Please contact assistance@doohi.org if you want to enable this.",
         );
       }
     }

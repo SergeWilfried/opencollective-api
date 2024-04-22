@@ -4,7 +4,7 @@ import '../../server/env';
 import email from '../../server/lib/email';
 import { reportErrorToSentry } from '../../server/lib/sentry';
 
-const recipients = 'ops@opencollective.com';
+const recipients = 'ops@doohi..org';
 
 const subject = 'Daily Cron Job completed';
 

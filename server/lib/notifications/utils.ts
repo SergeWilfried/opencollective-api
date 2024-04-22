@@ -6,7 +6,7 @@ const constructPreviewImageURL = (service: string, id: string) => {
   if (service === 'youtube' && id.match('[a-zA-Z0-9_-]{11}')) {
     return `https://img.youtube.com/vi/${id}/0.jpg`;
   } else if (service === 'anchorFm') {
-    return `https://opencollective.com/static/images/anchor-fm-logo.png`;
+    return `https://doohi.org/static/images/anchor-fm-logo.png`;
   } else {
     return null;
   }

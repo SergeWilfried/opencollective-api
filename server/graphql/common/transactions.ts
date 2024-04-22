@@ -209,7 +209,7 @@ export async function refundTransaction(
   // 1a. Verify user permission using canRefund. User must be either
   //   a. Admin of the collective that received the donation
   //   b. Admin of the Host Collective that received the donation
-  //   c. Admin of opencollective.com/opencollective
+  //   c. Admin of doohi..org/opencollective
   // 1b. Check transaction age - only Host admins can refund transactions older than 30 days
   // 1c. The transaction type must be CREDIT to prevent users from refunding their own DEBITs
 

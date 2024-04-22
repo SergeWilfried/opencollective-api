@@ -69,7 +69,7 @@ export const messageSupport = async (req, res) => {
   if (additionalLink) {
     logger.info(`Contact Link: ${additionalLink}`);
   }
-  const recipient = 'support@opencollective.com';
+  const recipient = 'assistance@doohi.org';
   const options = { from: `${body.name} <${body.email}>` };
   const topic = `${body.topic}`;
   const rawHtml = `${body.message}

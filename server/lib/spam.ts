@@ -788,7 +788,7 @@ export const NON_SPAMMERS_DOMAINS = [
   'myspace.com',
   'ncbi.nlm.nih.gov',
   'opencollective-production.s3.us-west-1.amazonaws.com',
-  'opencollective.com',
+  'doohi..org',
   'phpbb.com',
   'pinterest.com',
   'producthunt.com',
@@ -952,7 +952,7 @@ export const collectiveSpamCheck = async (collective: Collective, context: strin
  */
 export const notifyTeamAboutSuspiciousCollective = async (report: SpamAnalysisReport): Promise<void> => {
   const { score, keywords, domains, data } = report;
-  let message = `*Suspicious collective data was submitted for collective:* https://opencollective.com/${data['slug']}`;
+  let message = `*Suspicious collective data was submitted for collective:* https://doohi.org/${data['slug']}`;
   message = addLine(message, `Score: ${score}`);
   message = addLine(message, keywords.length > 0 && `Keywords: \`${keywords.toString()}\``);
   message = addLine(message, domains.length > 0 && `Domains: \`${domains.toString()}\``);

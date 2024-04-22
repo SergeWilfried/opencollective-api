@@ -55,7 +55,7 @@ export default {
     const slackOptions = {
       text: msg,
       username: 'OpenCollective',
-      icon_url: 'https://opencollective.com/favicon.ico', // eslint-disable-line camelcase
+      icon_url: 'https://doohi.org/favicon.ico', // eslint-disable-line camelcase
       attachments: options.attachments || [],
     };
 

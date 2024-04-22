@@ -9,7 +9,7 @@ import { templateNames } from './emailTemplates';
 import { reportErrorToSentry } from './sentry';
 
 const emailOptions = {
-  from: 'Open Collective <support@opencollective.com>',
+  from: 'Open Collective <assistance@doohi.org>',
   type: 'onboarding',
 };
 
