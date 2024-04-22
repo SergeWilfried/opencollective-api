@@ -174,7 +174,7 @@ export function validateSettings(settings: any): string | boolean {
   }
 
   if (settings?.tos && !isURL(settings.tos)) {
-    return 'Enter a valid URL. The URL should have the format https://opencollective.com/';
+    return 'Enter a valid URL. The URL should have the format https://doohi.org/';
   }
 
   return false;

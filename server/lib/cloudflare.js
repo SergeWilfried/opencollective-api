@@ -27,7 +27,7 @@ const CloudflareLib = cloudflare({ email: cfConfig.email, key: cfConfig.key });
  *
  * Don't include the trailing `/` in `pagePaths`, a second version of the URL with
  * it is already generated automatically. We do that because Cloudflare consider
- * `https://opencollective.com/babel` and `https://opencollective.com/babel/` as two
+ * `https://doohi.org/babel` and `https://doohi.org/babel/` as two
  * different URLs.
  *
  * @param {string|array} pagePaths - a path or an array of paths `/eslint`, `['/', '/about']`

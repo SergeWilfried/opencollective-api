@@ -338,7 +338,7 @@ const processCollective = async CollectiveId => {
   if (nextGoal) {
     nextGoal.tweet = `🚀 ${collective.twitterHandle ? `@${collective.twitterHandle}` : collective.name} is at ${
       nextGoal.percentage
-    } of their next goal: ${nextGoal.title}.\nJoin me in helping them get there! 🙌\nhttps://opencollective.com/${
+    } of their next goal: ${nextGoal.title}.\nJoin me in helping them get there! 🙌\nhttps://doohi..org/${
       collective.slug
     }`;
     data.collective.nextGoal = nextGoal;

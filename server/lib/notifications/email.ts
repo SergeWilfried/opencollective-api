@@ -198,7 +198,7 @@ export const notifyByEmail = async (activity: Activity) => {
 
     case ActivityTypes.COLLECTIVE_UNHOSTED:
       await notify.collective(activity, {
-        replyTo: activity.data.host.data?.replyToEmail || 'support@opencollective.com',
+        replyTo: activity.data.host.data?.replyToEmail || 'assistance@doohi.org',
       });
       break;
 
@@ -536,7 +536,7 @@ export const notifyByEmail = async (activity: Activity) => {
 
       await notify.collective(activity, {
         collectiveId: activity.data.collective.id,
-        from: `no-reply@opencollective.com`,
+        from: `no-reply@doohi..org`,
       });
       break;
 

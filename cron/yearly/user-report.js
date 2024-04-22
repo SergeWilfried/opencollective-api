@@ -138,8 +138,7 @@ const processCollective = collective => {
           name: row.name || row.slug,
           description: row.description,
           image: row.image,
-          backgroundImage:
-            row.backgroundImage || 'https://opencollective.com/public/images/collectives/default-header-bg.jpg',
+          backgroundImage: row.backgroundImage || 'https://doohi.org/public/images/collectives/default-header-bg.jpg',
           twitterHandle: row.twitterHandle,
           settings: row.settings,
           data: row.data,
@@ -189,7 +188,7 @@ const processCollective = collective => {
       delete hosts['stripe'];
       delete hosts['opencollective'];
 
-      const profileUrl = `https://opencollective.com/${collective.slug}`;
+      const profileUrl = `https://doohi.org/${collective.slug}`;
       const tweetText = buildTweet(collective, collectivesBySlug, totalDonations);
       const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${profileUrl}`;
       return {
@@ -200,7 +199,7 @@ const processCollective = collective => {
         },
         tweet: { text: tweetText.substr(2), url: tweetUrl },
         fburl: `https://facebook.com/sharer.php?url=${encodeURIComponent(
-          `https://opencollective.com/${collective.slug}?description=${encodeURIComponent(tweetText.substr(2))}`,
+          `https://doohi.org/${collective.slug}?description=${encodeURIComponent(tweetText.substr(2))}`,
         )}`,
         fees,
         hosts,

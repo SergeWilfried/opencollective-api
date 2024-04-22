@@ -100,7 +100,7 @@ export const checkOrdersLimit = async (
   debug(`checkOrdersLimit reqIp:${reqIp} reqMask:${reqMask}`);
 
   // Generic error message
-  // const errorMessage = 'Error while processing your request, please try again or contact support@opencollective.com.';
+  // const errorMessage = 'Error while processing your request, please try again or contact assistance@doohi.org.';
   const errorMessage = 'Your card was declined.';
 
   const limits = getOrdersLimit(order, reqIp, reqMask);

@@ -235,7 +235,7 @@ export async function createOrder(order, req) {
   await orderFraudProtection(req, order).catch(error => {
     reportErrorToSentry(error, { transactionName: 'orderFraudProtection', user: req.remoteUser });
     throw new ValidationFailed(
-      "There's something wrong with the payment, please contact support@opencollective.com.",
+      "There's something wrong with the payment, please contact assistance@doohi.org.",
       undefined,
       { includeId: true },
     );

@@ -169,7 +169,7 @@ const sendMessage = (
       sendToBcc = false;
     }
     if (sendToBcc) {
-      to = `emailbcc+${to.replace(/@/g, '-at-')}@opencollective.com`;
+      to = `emailbcc+${to.replace(/@/g, '-at-')}@doohi.org`;
     }
   }
 
@@ -418,7 +418,7 @@ const generateEmailFromTemplateAndSend = async (
     });
 };
 
-const generateFromEmailHeader = (name, email = 'no-reply@opencollective.com') => {
+const generateFromEmailHeader = (name, email = 'no-reply@doohi..org') => {
   // Remove extra spaces/newlines and replace `"` by another quote character to avoid errors
   const sanitizedName = name.replace(/\s+/g, ' ').trim().replaceAll('"', '“');
   return `"${sanitizedName}" <${email}>`;

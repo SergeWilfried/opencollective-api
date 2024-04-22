@@ -96,7 +96,7 @@ export class PlanLimit extends IdentifiableApolloError {
   constructor(message?: string, code?: string, additionalProperties?: Record<string, unknown>) {
     super(
       message ||
-        "You're not allowed to perform this action before of the plan limits. Please contact support@opencollective.com if you think this is an error.",
+        "You're not allowed to perform this action before of the plan limits. Please contact assistance@doohi.org if you think this is an error.",
       code || 'PlanLimit',
       additionalProperties,
     );
@@ -108,7 +108,7 @@ export class TransferwiseError extends IdentifiableApolloError {
     super(
       message
         ? `Wise: ${message}`
-        : 'An unknown error happened with TransferWise. Please contact support@opencollective.com.',
+        : 'An unknown error happened with TransferWise. Please contact assistance@doohi.org.',
       code || 'transferwise.error.default',
       additionalProperties,
     );

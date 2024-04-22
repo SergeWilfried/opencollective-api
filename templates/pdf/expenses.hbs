@@ -147,7 +147,7 @@ td.tdpadding {
             <td class="tdpadding" width=30>&nbsp;&nbsp;</td>
             <td nowrap>{{moment createdAt format="YYYY-MM-DD"}}</td>
           </tr>
-          <tr><th>Collective</th><td></td><td><a href="https://opencollective.com/{{collective.slug}}">{{collective.slug}}</a></td></tr>
+          <tr><th>Collective</th><td></td><td><a href="https://doohi.org/{{collective.slug}}">{{collective.slug}}</a></td></tr>
           <tr><th>Category</th><td></td><td nowrap>{{Expense.category}}</td></tr>
         </table>
         <table class="amountDetails">
@@ -163,7 +163,7 @@ td.tdpadding {
           </tr>
           <tr><th nowrap>Net amount in {{@root.host.currency}}</th><td></td><td>{{currency netAmountInHostCurrency currency=@root.host.currency}}{{#if note}}*{{/if}}</td></tr>
           <tr><th nowrap>Payout method</th><td></td><td nowrap>{{Expense.legacyPayoutMethod}}</td></tr>
-          <tr><th>Recipient</th><td></td><td nowrap><a href="https://opencollective.com/{{Expense.fromCollective.slug}}">{{Expense.fromCollective.name}}</a></td></tr>
+          <tr><th>Recipient</th><td></td><td nowrap><a href="https://doohi.org/{{Expense.fromCollective.slug}}">{{Expense.fromCollective.name}}</a></td></tr>
         </table>
         <table class="expenseTitleDescription">
           <tr>
@@ -189,7 +189,7 @@ td.tdpadding {
         </div>
       {{/each}}
 
-      <div class="footer">{{@root.host.name}} - {{@root.month}} {{@root.year}} expense receipts - expense {{page}}/{{@root.stats.numberPaidExpenses}} - <a href="https://opencollective.com/{{collective.slug}}/expenses/{{Expense.id}}">opencollective.com/{{collective.slug}}/expenses/{{Expense.id}}</a></div>
+      <div class="footer">{{@root.host.name}} - {{@root.month}} {{@root.year}} expense receipts - expense {{page}}/{{@root.stats.numberPaidExpenses}} - <a href="https://doohi.org/{{collective.slug}}/expenses/{{Expense.id}}">doohi..org/{{collective.slug}}/expenses/{{Expense.id}}</a></div>
 
     </div>
   {{/each}}

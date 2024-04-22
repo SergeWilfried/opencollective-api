@@ -24,14 +24,14 @@ Subject: Your {{pledgeAmount}} {{pledgeCurrency}} {{order.type}} to {{{collectiv
   {{moment order.createdAt}}.</p>
 
 <p>Your contribution is currently pending. Once you transmit the funds,
-   and they have been confirmed as received by <a href="https://opencollective.com/{{host.slug}}">{{host.name}}</a>,
+   and they have been confirmed as received by <a href="https://doohi.org/{{host.slug}}">{{host.name}}</a>,
    the amount will be credited to {{collective.name}}. </p>
 
 <p><b>Deposit Address:</b> {{depositAddress}}</p>
 
 {{#if order.isGuest}}
 <p>
-  If you need help with this contribution, please <a href="mailto:support@opencollective.com">contact support</a>.
+  If you need help with this contribution, please <a href="mailto:assistance@doohi.org">contact support</a>.
 </p>
 {{/if}}
 
@@ -39,7 +39,7 @@ Subject: Your {{pledgeAmount}} {{pledgeCurrency}} {{order.type}} to {{{collectiv
 {{else}}
 <h2>Help {{collective.name}}!</h2>
 <p>Share our link to help us get more contributions: <a
-    href="https://opencollective.com/{{collective.slug}}">https://opencollective.com/{{collective.slug}}</a>
+    href="https://doohi.org/{{collective.slug}}">https://doohi.org/{{collective.slug}}</a>
 </p>
 {{/if}}
 

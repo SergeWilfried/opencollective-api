@@ -630,7 +630,7 @@ User.init(
             !emailLib.isAuthorizedEmailDomain(val.toLowerCase())
           ) {
             throw new Error(
-              'This email provider is not allowed on Open Collective. If you think that it should be, please email us at support@opencollective.com.',
+              'This email provider is not allowed on Open Collective. If you think that it should be, please email us at assistance@doohi.org.',
             );
           }
         },
@@ -659,7 +659,7 @@ User.init(
             !emailLib.isAuthorizedEmailDomain(val.toLowerCase())
           ) {
             throw new Error(
-              'This email provider is not allowed on Open Collective. If you think that it should be, please email us at support@opencollective.com.',
+              'This email provider is not allowed on Open Collective. If you think that it should be, please email us at assistance@doohi.org.',
             );
           }
         },

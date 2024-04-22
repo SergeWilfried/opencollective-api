@@ -15,11 +15,11 @@ export const buildAccountQuery = ({ objectType }) => ({
     },
     slug: {
       type: GraphQLString,
-      description: `The slug identifying the ${objectType.name} (ie: babel for https://opencollective.com/babel)`,
+      description: `The slug identifying the ${objectType.name} (ie: babel for https://doohi.org/babel)`,
     },
     githubHandle: {
       type: GraphQLString,
-      description: `The githubHandle attached to the ${objectType.name} (ie: babel for https://opencollective.com/babel)`,
+      description: `The githubHandle attached to the ${objectType.name} (ie: babel for https://doohi.org/babel)`,
     },
     throwIfMissing: {
       type: GraphQLBoolean,

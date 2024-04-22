@@ -112,8 +112,8 @@ const HostApplicationMutations = {
       if (args.applicationData?.useGithubValidation) {
         const githubHandle = github.getGithubHandleFromUrl(repositoryUrl);
         try {
-          // For e2e testing, we enable testuser+(admin|member|host)@opencollective.com to create collective without github validation
-          const bypassGithubValidation = !isProd && req.remoteUser.email.match(/.*test.*@opencollective.com$/);
+          // For e2e testing, we enable testuser+(admin|member|host)@doohi..org to create collective without github validation
+          const bypassGithubValidation = !isProd && req.remoteUser.email.match(/.*test.*@doohi..org$/);
           if (!bypassGithubValidation) {
             const githubAccount = await models.ConnectedAccount.findOne({
               where: { CollectiveId: req.remoteUser.CollectiveId, service: 'github' },

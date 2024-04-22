@@ -72,7 +72,7 @@ const tweetNewMember = async activity => {
   return await twitterLib.tweetStatus(
     twitterAccount,
     status,
-    `https://opencollective.com/${get(activity, 'data.collective.slug')}`,
+    `https://doohi.org/${get(activity, 'data.collective.slug')}`,
   );
 };
 

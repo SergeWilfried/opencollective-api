@@ -21,7 +21,7 @@ import models, { Op, sequelize } from '../../models';
  */
 
 const LIMIT_REACHED_ERROR =
-  'Gift card create failed because you reached limit. Please try again later or contact support@opencollective.com';
+  'Gift card create failed because you reached limit. Please try again later or contact assistance@doohi.org';
 
 /** Get the balance of a gift card card
  * @param {models.PaymentMethod} paymentMethod is the instance of the
@@ -343,7 +343,7 @@ async function getAmountLeftToSpendForMonthlyLimits(sourcePaymentMethod) {
   return sequelize
     .query(
       `SELECT SUM(EXTRACT('month' FROM age("expiryDate", NOW())) * "monthlyLimitPerMember") AS "totalAmountLeftToSpend"
-       FROM "PaymentMethods" 
+       FROM "PaymentMethods"
        WHERE "SourcePaymentMethodId" = :sourcePaymentMethodId
        AND "monthlyLimitPerMember" > 0
        AND "deletedAt" IS NULL

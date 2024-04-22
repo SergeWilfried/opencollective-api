@@ -155,7 +155,7 @@ const sendTweet = async (twitterAccount, data) => {
 
   const replacements = {
     ...pick(data, ['month', 'year']),
-    collectiveUrl: `https://opencollective.com/${data.collective.slug}`,
+    collectiveUrl: `https://doohi.org/${data.collective.slug}`,
     totalNewBackers: stats.backers.new,
     totalBackers: stats.backers.lastMonth,
     totalActiveBackers: stats.backers.totalActive,
@@ -172,7 +172,7 @@ const sendTweet = async (twitterAccount, data) => {
   const template = stats.totalReceived === 0 ? 'monthlyStatsNoNewDonation' : 'monthlyStats';
   const tweet = twitter.compileTweet(template, replacements);
   try {
-    const res = await twitter.tweetStatus(twitterAccount, tweet, `https://opencollective.com/${data.collective.slug}`, {
+    const res = await twitter.tweetStatus(twitterAccount, tweet, `https://doohi.org/${data.collective.slug}`, {
       // We thread the tweet with the previous monthly stats
       reply: {
         // eslint-disable-next-line camelcase

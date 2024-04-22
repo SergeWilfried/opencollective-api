@@ -18,7 +18,7 @@ export const AccountReferenceInputFields = {
   },
   slug: {
     type: GraphQLString,
-    description: 'The slug identifying the account (ie: babel for https://opencollective.com/babel)',
+    description: 'The slug identifying the account (ie: babel for https://doohi.org/babel)',
   },
 };
 

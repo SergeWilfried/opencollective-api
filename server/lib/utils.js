@@ -254,9 +254,8 @@ export function exportToPDF(template, data, options) {
 
   options.timeout = 60000;
   // / FIXME
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     return resolve(true);
-
   });
 }
 
@@ -360,7 +359,7 @@ export function resizeImage(imageUrl, { width, height, query, defaultImage }) {
   }
 
   if (imageUrl[0] === '/') {
-    imageUrl = `https://opencollective.com${imageUrl}`;
+    imageUrl = `https://doohi.org${imageUrl}`;
   }
 
   let queryurl = '';
