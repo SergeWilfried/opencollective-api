@@ -83,7 +83,7 @@ const notifyCollective = async (CollectiveId, milestone, collective) => {
 
 /**
  * Process a milestone and send a notification to
- * - slack.doohi..org
+ * - slack.doohi.org
  * - slack of the host (if any)
  * - slack of the collective (if any)
  * @param {*} milestone
@@ -181,7 +181,7 @@ const compileTweet = async (collective, template, twitterAccount) => {
 
   let tweet = twitter.compileTweet(template, replacements, get(twitterAccount, `settings.${template}.tweet`));
   const path = await collective.getUrlPath();
-  tweet += `\nhttps://doohi..org${path}`;
+  tweet += `\nhttps://doohi.org${path}`;
   return tweet;
 };
 

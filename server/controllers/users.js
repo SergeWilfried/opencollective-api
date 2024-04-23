@@ -151,8 +151,8 @@ export const signin = async (req, res, next) => {
         { sendEvenIfNotProduction: true },
       );
 
-      // For e2e testing, we enable testuser+(admin|member)@doohi..org to automatically receive the login link
-      if (config.env !== 'production' && user.email.match(/.*test.*@doohi..org$/)) {
+      // For e2e testing, we enable testuser+(admin|member)@doohi.org to automatically receive the login link
+      if (config.env !== 'production' && user.email.match(/.*test.*@doohi.org$/)) {
         return res.send({ success: true, redirect: loginLink });
       }
     }
