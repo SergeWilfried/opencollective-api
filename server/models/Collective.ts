@@ -840,7 +840,7 @@ class Collective extends Model<
     if (this.type === 'USER') {
       if (user && user.email && this.name && this.name !== 'incognito') {
         const emailHash = md5(user.email.toLowerCase().trim());
-        const avatar = `https://www.gravatar.com/avatar/${emailHash}?default=404`;
+        const avatar = `https://www.gravatar.com/avatar/${emailHash}`;
         return this.checkAndUpdateImage(avatar, force);
       }
     }
