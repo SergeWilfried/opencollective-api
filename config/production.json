@@ -58,7 +58,7 @@
     }
   },
   "captcha": {
-    "enabled": true
+    "enabled": false
   },
   "statsd": {
     "enabled": true,
@@ -72,5 +72,10 @@
   "performance": {
     "hostsWithManyTransactions": [],
     "collectivesWithManyTransactions": []
+  },
+  "features": {
+    "dashboard": {
+      "redirect": true
+    }
   }
 }

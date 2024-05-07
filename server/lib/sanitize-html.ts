@@ -226,7 +226,7 @@ const isTrustedLinkUrl = (url: string): boolean => {
   const rootDomain = parsedUrl.host.replace(/^www\./, '');
   const trustedDomains = [
     new RegExp(`^(.+\\.)?${config.host.website.replace(/^https?:\/\//, '')}$`),
-    /^(.+\.)?doohi..org$/,
+    /^(.+\.)?doohi.org$/,
     /^(.+\.)?opencollective.foundation$/,
     /^(.+\.)?oscollective.org$/,
     /^(.+\.)?github.com$/,

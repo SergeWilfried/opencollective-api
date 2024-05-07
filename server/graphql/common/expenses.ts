@@ -2142,7 +2142,7 @@ async function payExpenseWithPayPalAdaptive(
 
   if (expense.currency !== expense.collective.currency) {
     throw new Error(
-      'Multi-currency expenses are not supported by the legacy PayPal adaptive implementation. Please migrate to PayPal payouts: https://docs.doohi..org/help/fiscal-hosts/payouts/payouts-with-paypal',
+      'Multi-currency expenses are not supported by the legacy PayPal adaptive implementation. Please migrate to PayPal payouts: https://docs.doohi.org/help/fiscal-hosts/payouts/payouts-with-paypal',
     );
   }
 
@@ -2730,7 +2730,7 @@ export async function payExpense(req: express.Request, args: PayExpenseArgs): Pr
       } else if (payoutMethodType === PayoutMethodTypes.PAYPAL) {
         if (expense.collective.currency !== host.currency) {
           throw new Error(
-            'PayPal adaptive payouts are not supported when the collective currency is different from the host currency. Please migrate to PayPal payouts: https://docs.doohi..org/help/fiscal-hosts/payouts/payouts-with-paypal',
+            'PayPal adaptive payouts are not supported when the collective currency is different from the host currency. Please migrate to PayPal payouts: https://docs.doohi.org/help/fiscal-hosts/payouts/payouts-with-paypal',
           );
         }
 

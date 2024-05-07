@@ -84,8 +84,8 @@
     "maxCoreContributorsPerAccount": 60
   },
   "email": {
-    "from": "Open Collective <info@opencollective.com>",
-    "noReply": "Open Collective <no-reply@opencollective.com>"
+    "from": "Doohi <info@doohi.org>",
+    "noReply": "Doohi <no-reply@doohi.org>"
   },
   "log": {
     "level": "info",

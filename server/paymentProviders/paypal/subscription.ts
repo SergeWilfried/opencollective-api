@@ -101,7 +101,7 @@ export const getProductTypeAndCategory = (tier: Tier): [PaypalProductType, Paypa
  */
 const getImageUrlForPaypal = collective => {
   if (config.host.images.startsWith('http://localhost')) {
-    return 'https://images.doohi..org/opencollective/logo/256.png';
+    return 'https://images.doohi.org/opencollective/logo/256.png';
   } else {
     return collective.getImageUrl();
   }

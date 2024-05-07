@@ -788,7 +788,7 @@ export const NON_SPAMMERS_DOMAINS = [
   'myspace.com',
   'ncbi.nlm.nih.gov',
   'opencollective-production.s3.us-west-1.amazonaws.com',
-  'doohi..org',
+  'doohi.org',
   'phpbb.com',
   'pinterest.com',
   'producthunt.com',

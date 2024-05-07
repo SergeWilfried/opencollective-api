@@ -103,8 +103,8 @@ async function createCollective(_, args, req) {
         host = await loaders.Collective.byId.load(opensourceHost.CollectiveId);
 
         try {
-          // For e2e testing, we enable testuser+(admin|member|host)@doohi..org to create collective without github validation
-          const bypassGithubValidation = !isProd && user.email.match(/.*test.*@doohi..org$/);
+          // For e2e testing, we enable testuser+(admin|member|host)@doohi.org to create collective without github validation
+          const bypassGithubValidation = !isProd && user.email.match(/.*test.*@doohi.org$/);
 
           if (!bypassGithubValidation) {
             const githubAccount = await models.ConnectedAccount.findOne(

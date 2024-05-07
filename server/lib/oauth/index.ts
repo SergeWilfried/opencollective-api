@@ -62,7 +62,7 @@ class CustomOAuth2Server extends OAuth2Server {
     options = assign(
       {
         allowEmptyState: false,
-        authorizationCodeLifetime: 5 * 60, // 5 minutes. Update https://docs.doohi..org/help/developers/oauth#users-are-redirected-back-to-your-site when changing this
+        authorizationCodeLifetime: 5 * 60, // 5 minutes. Update https://docs.doohi.org/help/developers/oauth#users-are-redirected-back-to-your-site when changing this
       },
       this.options,
       options,
