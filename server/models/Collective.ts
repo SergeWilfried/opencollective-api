@@ -799,7 +799,7 @@ class Collective extends Model<
           status: 'CONFIRMED',
           organizer: {
             name: parentCollective.name,
-            email: `no-reply@doohi..org`,
+            email: `no-reply@doohi.org`,
           },
           alarms,
         };

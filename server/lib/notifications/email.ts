@@ -536,7 +536,7 @@ export const notifyByEmail = async (activity: Activity) => {
 
       await notify.collective(activity, {
         collectiveId: activity.data.collective.id,
-        from: `no-reply@doohi..org`,
+        from: `no-reply@doohi.org`,
       });
       break;
 

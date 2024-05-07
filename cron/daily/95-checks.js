@@ -4,7 +4,7 @@ import '../../server/env';
 import { checkAllModels } from '../../checks/model';
 import email from '../../server/lib/email';
 
-const recipients = 'ops@doohi..org';
+const recipients = 'ops@doohi.org';
 
 const subject = 'Daily Checks failed';
 

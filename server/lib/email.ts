@@ -418,7 +418,7 @@ const generateEmailFromTemplateAndSend = async (
     });
 };
 
-const generateFromEmailHeader = (name, email = 'no-reply@doohi..org') => {
+const generateFromEmailHeader = (name, email = 'no-reply@doohi.org') => {
   // Remove extra spaces/newlines and replace `"` by another quote character to avoid errors
   const sanitizedName = name.replace(/\s+/g, ' ').trim().replaceAll('"', '“');
   return `"${sanitizedName}" <${email}>`;
