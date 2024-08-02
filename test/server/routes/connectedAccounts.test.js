@@ -5,6 +5,9 @@ import request from 'supertest';
 import app from '../../../server/index';
 import models from '../../../server/models';
 import * as utils from '../../utils';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 const clientId = config.github.clientID;
 const application = utils.data('application');
