@@ -15,20 +15,20 @@
     }
   },
   "host": {
-    "api": "https://api-staging.opencollective.com",
-    "frontend": "https://frontend-staging.opencollective.com",
-    "images": "https://images-staging.opencollective.com",
-    "website": "https://staging.opencollective.com"
+    "api": "https://api-staging.doohi.com",
+    "frontend": "https://frontend-staging.doohi.com",
+    "images": "https://images-staging.doohi.com",
+    "website": "https://staging.doohi.com"
   },
   "log": {
     "slowRequest": true
   },
   "stripe": {
     "webhookSigningSecret": "whsec_ygKqDLhcNrbtmAfqunpHEYkAWGWJeHTP",
-    "redirectUri": "https://api-staging.opencollective.com/connected-accounts/stripe/callback"
+    "redirectUri": "https://api-staging.doohi.com/connected-accounts/stripe/callback"
   },
   "transferwise": {
-    "redirectUri": "https://api-staging.opencollective.com/connected-accounts/transferwise/callback"
+    "redirectUri": "https://api-staging.doohi.com/connected-accounts/transferwise/callback"
   },
   "githubFlow": {
     "minNbStars": 0
@@ -60,6 +60,6 @@
   "webauthn": {
     "rpName": "[Staging] Open Collective",
     "rpId": "staging.opencollective.com",
-    "expectedOrigins": ["https://staging.opencollective.com"]
+    "expectedOrigins": ["https://staging.doohi.com"]
   }
 }
